@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *     @OA\Property(property="approver_id", type="integer", example=1, description="Onaylayan kişi ID"),
  *     @OA\Property(property="color_copies", type="integer", example=5, description="Renkli kopya sayısı"),
  *     @OA\Property(property="bw_copies", type="integer", example=10, description="Siyah-beyaz kopya sayısı"),
+ *     @OA\Property(property="description", type="string", example="Matematik dersi için fotokopi isteği", description="İstek açıklama metni"),
  *     @OA\Property(property="requested_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z", description="İstek tarihi"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z"),
@@ -32,6 +33,7 @@ class PrintRequest extends Model
         'requested_at',
         'color_copies',
         'bw_copies',
+        'description',
         'requester_id',
         'approver_id',
     ];

@@ -21,8 +21,33 @@
                     "Approvers"
                 ],
                 "summary": "Tüm onaylayanları listeleme",
-                "description": "Sistemdeki tüm onaylayanları getirir",
+                "description": "Sistemdeki tüm onaylayanları getirir. Pagination destekler.",
                 "operationId": "297dbb929633641ac6ea9568b3f2c535",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Sayfa numarası (varsayılan: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "example": 10
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Başarılı",
@@ -43,6 +68,31 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Onaylayanlar başarıyla listelendi."
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "total_pages": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "has_next_page": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -333,8 +383,8 @@
                 "tags": [
                     "Approvers"
                 ],
-                "summary": "Onaylayan silme",
-                "description": "Belirtilen onaylayanı sistemden siler",
+                "summary": "Onaylayan silme (Soft Delete)",
+                "description": "Belirtilen onaylayanı sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
                 "operationId": "cc239daca35f683fe23b702120354b6f",
                 "parameters": [
                     {
@@ -732,8 +782,33 @@
                     "Print Requests"
                 ],
                 "summary": "Tüm fotokopi isteklerini listeleme",
-                "description": "Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir",
+                "description": "Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir. Pagination destekler.",
                 "operationId": "9924477ab0eb432188083718243eb910",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Sayfa numarası (varsayılan: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "example": 10
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Başarılı",
@@ -754,6 +829,31 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Fotokopi istekleri başarıyla listelendi."
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "total_pages": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "has_next_page": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1096,8 +1196,8 @@
                 "tags": [
                     "Print Requests"
                 ],
-                "summary": "Fotokopi isteği silme",
-                "description": "Belirtilen fotokopi isteğini sistemden siler",
+                "summary": "Fotokopi isteği silme (Soft Delete)",
+                "description": "Belirtilen fotokopi isteğini sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
                 "operationId": "2272d908378c221cc99627742370acb1",
                 "parameters": [
                     {
@@ -1162,8 +1262,33 @@
                     "Requesters"
                 ],
                 "summary": "Tüm talep edenleri listeleme",
-                "description": "Sistemdeki tüm talep edenleri getirir",
+                "description": "Sistemdeki tüm talep edenleri getirir. Pagination destekler.",
                 "operationId": "e56907a671ee74565780425153e6aa80",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Sayfa numarası (varsayılan: 1)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "example": 10
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Başarılı",
@@ -1184,6 +1309,31 @@
                                         "message": {
                                             "type": "string",
                                             "example": "Talep edenler başarıyla listelendi."
+                                        },
+                                        "pagination": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                },
+                                                "total_pages": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "has_next_page": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
                                     },
                                     "type": "object"
@@ -1474,8 +1624,8 @@
                 "tags": [
                     "Requesters"
                 ],
-                "summary": "Talep eden silme",
-                "description": "Belirtilen talep edeni sistemden siler",
+                "summary": "Talep eden silme (Soft Delete)",
+                "description": "Belirtilen talep edeni sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
                 "operationId": "eb5e3b990aa82afbdc7eb8744c40fa83",
                 "parameters": [
                     {
@@ -1560,6 +1710,12 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-08-18T14:30:00.000000Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-18T14:30:00.000000Z",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -1609,6 +1765,12 @@
                         "format": "date-time",
                         "example": "2025-08-18T14:30:00.000000Z"
                     },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-18T14:30:00.000000Z",
+                        "nullable": true
+                    },
                     "requester": {
                         "$ref": "#/components/schemas/Requester"
                     },
@@ -1641,6 +1803,12 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2025-08-18T14:30:00.000000Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-18T14:30:00.000000Z",
+                        "nullable": true
                     }
                 },
                 "type": "object"

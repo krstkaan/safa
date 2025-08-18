@@ -12,16 +12,37 @@ class ApproverController extends Controller
      * @OA\Get(
      *     path="/approvers",
      *     summary="Tüm onaylayanları listeleme",
-     *     description="Sistemdeki tüm onaylayanları getirir",
+     *     description="Sistemdeki tüm onaylayanları getirir. Pagination destekler.",
      *     tags={"Approvers"},
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Sayfa numarası (varsayılan: 1)",
+     *         @OA\Schema(type="integer", example=1, minimum=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         required=false,
+     *         description="Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
+     *         @OA\Schema(type="integer", example=10, minimum=1, maximum=100)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Başarılı",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Approver")),
-     *             @OA\Property(property="message", type="string", example="Onaylayanlar başarıyla listelendi.")
+     *             @OA\Property(property="message", type="string", example="Onaylayanlar başarıyla listelendi."),
+     *             @OA\Property(property="pagination", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="per_page", type="integer", example=10),
+     *                 @OA\Property(property="total", type="integer", example=50),
+     *                 @OA\Property(property="total_pages", type="integer", example=5),
+     *                 @OA\Property(property="has_next_page", type="boolean", example=true)
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -35,14 +56,41 @@ class ApproverController extends Controller
      * 
      * Tüm onaylayanları listeleme
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $approvers = Approver::all();
+        // Pagination parametrelerini al ve validate et
+        $page = max(1, (int) $request->get('page', 1));
+        $limit = min(100, max(1, (int) $request->get('limit', 10)));
+        
+        // Toplam kayıt sayısını al
+        $total = Approver::count();
+        
+        // Toplam sayfa sayısını hesapla
+        $totalPages = ceil($total / $limit);
+        
+        // Offset hesapla
+        $offset = ($page - 1) * $limit;
+        
+        // Onaylayanları getir
+        $approvers = Approver::orderBy('created_at', 'desc')
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
+        
+        // Sonraki sayfa var mı kontrolü
+        $hasNextPage = $page < $totalPages;
         
         return response()->json([
             'status' => 'success',
             'data' => $approvers,
-            'message' => 'Onaylayanlar başarıyla listelendi.'
+            'message' => 'Onaylayanlar başarıyla listelendi.',
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $limit,
+                'total' => $total,
+                'total_pages' => $totalPages,
+                'has_next_page' => $hasNextPage
+            ]
         ]);
     }
 

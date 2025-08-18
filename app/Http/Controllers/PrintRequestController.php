@@ -14,16 +14,37 @@ class PrintRequestController extends Controller
      * @OA\Get(
      *     path="/print-requests",
      *     summary="Tüm fotokopi isteklerini listeleme",
-     *     description="Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir",
+     *     description="Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir. Pagination destekler.",
      *     tags={"Print Requests"},
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="Sayfa numarası (varsayılan: 1)",
+     *         @OA\Schema(type="integer", example=1, minimum=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         required=false,
+     *         description="Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
+     *         @OA\Schema(type="integer", example=10, minimum=1, maximum=100)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Başarılı",
      *         @OA\JsonContent(
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/PrintRequest")),
-     *             @OA\Property(property="message", type="string", example="Fotokopi istekleri başarıyla listelendi.")
+     *             @OA\Property(property="message", type="string", example="Fotokopi istekleri başarıyla listelendi."),
+     *             @OA\Property(property="pagination", type="object",
+     *                 @OA\Property(property="current_page", type="integer", example=1),
+     *                 @OA\Property(property="per_page", type="integer", example=10),
+     *                 @OA\Property(property="total", type="integer", example=50),
+     *                 @OA\Property(property="total_pages", type="integer", example=5),
+     *                 @OA\Property(property="has_next_page", type="boolean", example=true)
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -37,16 +58,42 @@ class PrintRequestController extends Controller
      * 
      * Tüm fotokopi isteklerini listeleme
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        // Pagination parametrelerini al ve validate et
+        $page = max(1, (int) $request->get('page', 1));
+        $limit = min(100, max(1, (int) $request->get('limit', 10)));
+        
+        // Toplam kayıt sayısını al
+        $total = PrintRequest::count();
+        
+        // Toplam sayfa sayısını hesapla
+        $totalPages = ceil($total / $limit);
+        
+        // Offset hesapla
+        $offset = ($page - 1) * $limit;
+        
+        // Fotokopi isteklerini getir
         $printRequests = PrintRequest::with(['requester', 'approver'])
             ->orderBy('requested_at', 'desc')
+            ->offset($offset)
+            ->limit($limit)
             ->get();
+        
+        // Sonraki sayfa var mı kontrolü
+        $hasNextPage = $page < $totalPages;
         
         return response()->json([
             'status' => 'success',
             'data' => $printRequests,
-            'message' => 'Fotokopi istekleri başarıyla listelendi.'
+            'message' => 'Fotokopi istekleri başarıyla listelendi.',
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $limit,
+                'total' => $total,
+                'total_pages' => $totalPages,
+                'has_next_page' => $hasNextPage
+            ]
         ]);
     }
 

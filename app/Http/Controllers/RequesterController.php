@@ -226,8 +226,8 @@ class RequesterController extends Controller
     /**
      * @OA\Delete(
      *     path="/requesters/{id}",
-     *     summary="Talep eden silme",
-     *     description="Belirtilen talep edeni sistemden siler",
+     *     summary="Talep eden silme (Soft Delete)",
+     *     description="Belirtilen talep edeni sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
      *     tags={"Requesters"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -254,7 +254,7 @@ class RequesterController extends Controller
      *     )
      * )
      * 
-     * Talep eden silme
+     * Talep eden silme (Soft Delete)
      */
     public function destroy(Requester $requester): JsonResponse
     {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @OA\Schema(
@@ -18,12 +19,15 @@ use Illuminate\Database\Eloquent\Model;
  *     @OA\Property(property="requested_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z", description="İstek tarihi"),
  *     @OA\Property(property="created_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z"),
  *     @OA\Property(property="updated_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z"),
+ *     @OA\Property(property="deleted_at", type="string", format="date-time", example="2025-08-18T14:30:00.000000Z", nullable=true),
  *     @OA\Property(property="requester", ref="#/components/schemas/Requester", description="Talep eden kişi bilgileri"),
  *     @OA\Property(property="approver", ref="#/components/schemas/Approver", description="Onaylayan kişi bilgileri")
  * )
  */
 class PrintRequest extends Model
 {
+    use SoftDeletes;
+    
     protected $fillable = [
         'requested_at',
         'color_copies',

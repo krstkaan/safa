@@ -226,8 +226,8 @@ class ApproverController extends Controller
     /**
      * @OA\Delete(
      *     path="/approvers/{id}",
-     *     summary="Onaylayan silme",
-     *     description="Belirtilen onaylayanı sistemden siler",
+     *     summary="Onaylayan silme (Soft Delete)",
+     *     description="Belirtilen onaylayanı sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
      *     tags={"Approvers"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -254,7 +254,7 @@ class ApproverController extends Controller
      *     )
      * )
      * 
-     * Onaylayan silme
+     * Onaylayan silme (Soft Delete)
      */
     public function destroy(Approver $approver): JsonResponse
     {

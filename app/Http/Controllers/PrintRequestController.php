@@ -268,8 +268,8 @@ class PrintRequestController extends Controller
     /**
      * @OA\Delete(
      *     path="/print-requests/{id}",
-     *     summary="Fotokopi isteği silme",
-     *     description="Belirtilen fotokopi isteğini sistemden siler",
+     *     summary="Fotokopi isteği silme (Soft Delete)",
+     *     description="Belirtilen fotokopi isteğini sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
      *     tags={"Print Requests"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -296,7 +296,7 @@ class PrintRequestController extends Controller
      *     )
      * )
      * 
-     * Fotokopi isteği silme
+     * Fotokopi isteği silme (Soft Delete)
      */
     public function destroy(PrintRequest $printRequest): JsonResponse
     {

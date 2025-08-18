@@ -36,7 +36,7 @@ class PrintRequestController extends Controller
      *         in="query",
      *         required=false,
      *         description="Sıralama alanı (varsayılan: requested_at)",
-     *         @OA\Schema(type="string", enum={"id", "color_copies", "created_at", "updated_at", "bw_copies", "approver_id", "request_id"}, example="created_at")
+     *         @OA\Schema(type="string", enum={"id", "document_name", "requested_at", "approved_at", "requester_id", "approver_id", "color_copies", "bw_copies", "created_at", "updated_at"}, example="requested_at")
      *     ),
      *     @OA\Parameter(
      *         name="sort_direction",
@@ -83,7 +83,7 @@ class PrintRequestController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         
         // Geçerli sıralama alanlarını kontrol et
-        $allowedSortFields = ['id', 'document_name', 'requested_at', 'approved_at', 'created_at', 'updated_at'];
+        $allowedSortFields = ['id', 'document_name', 'requested_at', 'approved_at', 'requester_id', 'approver_id', 'color_copies', 'bw_copies', 'created_at', 'updated_at'];
         if (!in_array($sortBy, $allowedSortFields)) {
             $sortBy = 'requested_at';
         }

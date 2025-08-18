@@ -846,14 +846,17 @@
                             "type": "string",
                             "enum": [
                                 "id",
-                                "color_copies",
-                                "created_at",
-                                "updated_at",
-                                "bw_copies",
+                                "document_name",
+                                "requested_at",
+                                "approved_at",
+                                "requester_id",
                                 "approver_id",
-                                "request_id"
+                                "color_copies",
+                                "bw_copies",
+                                "created_at",
+                                "updated_at"
                             ],
-                            "example": "created_at"
+                            "example": "requested_at"
                         }
                     },
                     {

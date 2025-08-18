@@ -29,6 +29,20 @@ class RequesterController extends Controller
      *         description="Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
      *         @OA\Schema(type="integer", example=10, minimum=1, maximum=100)
      *     ),
+     *     @OA\Parameter(
+     *         name="sort_by",
+     *         in="query",
+     *         required=false,
+     *         description="Sıralama alanı (varsayılan: created_at)",
+     *         @OA\Schema(type="string", enum={"id", "name", "created_at", "updated_at"}, example="created_at")
+     *     ),
+     *     @OA\Parameter(
+     *         name="sort_direction",
+     *         in="query",
+     *         required=false,
+     *         description="Sıralama yönü (varsayılan: desc)",
+     *         @OA\Schema(type="string", enum={"asc", "desc"}, example="desc")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Başarılı",
@@ -62,6 +76,22 @@ class RequesterController extends Controller
         $page = max(1, (int) $request->get('page', 1));
         $limit = min(100, max(1, (int) $request->get('limit', 10)));
         
+        // Sıralama parametrelerini al ve validate et
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        
+        // Geçerli sıralama alanlarını kontrol et
+        $allowedSortFields = ['id', 'name', 'created_at', 'updated_at'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
+        
+        // Geçerli sıralama yönlerini kontrol et
+        $allowedSortDirections = ['asc', 'desc'];
+        if (!in_array($sortDirection, $allowedSortDirections)) {
+            $sortDirection = 'desc';
+        }
+        
         // Toplam kayıt sayısını al
         $total = Requester::count();
         
@@ -72,7 +102,7 @@ class RequesterController extends Controller
         $offset = ($page - 1) * $limit;
         
         // Talep edenleri getir
-        $requesters = Requester::orderBy('created_at', 'desc')
+        $requesters = Requester::orderBy($sortBy, $sortDirection)
             ->offset($offset)
             ->limit($limit)
             ->get();

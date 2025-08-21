@@ -102,7 +102,7 @@ class AuthController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"email","password"},
-     *             @OA\Property(property="email", type="string", format="email", example="ofis@example.com"),
+     *             @OA\Property(property="email", type="string", format="email", example="fatosakbulak@gmail.com"),
      *             @OA\Property(property="password", type="string", example="password")
      *         )
      *     ),
@@ -114,8 +114,8 @@ class AuthController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="user", type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
-     *                     @OA\Property(property="name", type="string", example="Ofis Kullanıcısı"),
-     *                     @OA\Property(property="email", type="string", example="ofis@example.com")
+     *                     @OA\Property(property="name", type="string", example="Fatma Akbulak"),
+     *                     @OA\Property(property="email", type="string", example="fatosakbulak@gmail.com")
      *                 ),
      *                 @OA\Property(property="token", type="string", example="1|abcdef123456...")
      *             ),
@@ -223,8 +223,8 @@ class AuthController extends Controller
      *             @OA\Property(property="status", type="string", example="success"),
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="Ofis Kullanıcısı"),
-     *                 @OA\Property(property="email", type="string", example="ofis@example.com")
+     *                 @OA\Property(property="name", type="string", example="Fatma Akbulak"),
+     *                 @OA\Property(property="email", type="string", example="fatosakbulak@gmail.com")
      *             ),
      *             @OA\Property(property="message", type="string", example="Kullanıcı bilgileri getirildi.")
      *         )

@@ -12,7 +12,7 @@ class ApproverController extends Controller
      * @OA\Get(
      *     path="/approvers",
      *     summary="Tüm onaylayanları listeleme",
-     *     description="Sistemdeki tüm onaylayanları getirir. Pagination destekler.",
+     *     description="Sistemdeki tüm onaylayanları getirir. Pagination ve arama destekler.",
      *     tags={"Approvers"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -34,7 +34,7 @@ class ApproverController extends Controller
      *         in="query",
      *         required=false,
      *         description="Sıralama alanı (varsayılan: created_at)",
-     *         @OA\Schema(type="string", enum={"id", "name", "created_at"}, example="created_at")
+     *         @OA\Schema(type="string", enum={"id", "name", "created_at", "updated_at"}, example="created_at")
      *     ),
      *     @OA\Parameter(
      *         name="sort_direction",
@@ -42,6 +42,13 @@ class ApproverController extends Controller
      *         required=false,
      *         description="Sıralama yönü (varsayılan: desc)",
      *         @OA\Schema(type="string", enum={"asc", "desc"}, example="desc")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         description="İsim alanında arama yapmak için kullanılır (case-insensitive)",
+     *         @OA\Schema(type="string", example="mehmet")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -80,6 +87,9 @@ class ApproverController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
         
+        // Arama parametresini al
+        $search = $request->get('search');
+        
         // Geçerli sıralama alanlarını kontrol et
         $allowedSortFields = ['id', 'name', 'created_at', 'updated_at'];
         if (!in_array($sortBy, $allowedSortFields)) {
@@ -92,8 +102,16 @@ class ApproverController extends Controller
             $sortDirection = 'desc';
         }
         
-        // Toplam kayıt sayısını al
-        $total = Approver::count();
+        // Query builder'ı oluştur
+        $query = Approver::query();
+        
+        // Arama varsa filtrele
+        if (!empty($search)) {
+            $query->where('name', 'ILIKE', '%' . $search . '%');
+        }
+        
+        // Toplam kayıt sayısını al (filtreleme sonrası)
+        $total = $query->count();
         
         // Toplam sayfa sayısını hesapla
         $totalPages = ceil($total / $limit);
@@ -102,7 +120,7 @@ class ApproverController extends Controller
         $offset = ($page - 1) * $limit;
         
         // Onaylayanları getir
-        $approvers = Approver::orderBy($sortBy, $sortDirection)
+        $approvers = $query->orderBy($sortBy, $sortDirection)
             ->offset($offset)
             ->limit($limit)
             ->get();
@@ -110,10 +128,15 @@ class ApproverController extends Controller
         // Sonraki sayfa var mı kontrolü
         $hasNextPage = $page < $totalPages;
         
+        $message = !empty($search) 
+            ? "Onaylayanlar arama sonuçları başarıyla listelendi." 
+            : "Onaylayanlar başarıyla listelendi.";
+        
         return response()->json([
             'status' => 'success',
             'data' => $approvers,
-            'message' => 'Onaylayanlar başarıyla listelendi.',
+            'message' => $message,
+            'search_term' => $search,
             'pagination' => [
                 'current_page' => $page,
                 'per_page' => $limit,

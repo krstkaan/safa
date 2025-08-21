@@ -21,7 +21,7 @@
                     "Approvers"
                 ],
                 "summary": "Tüm onaylayanları listeleme",
-                "description": "Sistemdeki tüm onaylayanları getirir. Pagination destekler.",
+                "description": "Sistemdeki tüm onaylayanları getirir. Pagination ve arama destekler.",
                 "operationId": "297dbb929633641ac6ea9568b3f2c535",
                 "parameters": [
                     {
@@ -57,7 +57,8 @@
                             "enum": [
                                 "id",
                                 "name",
-                                "created_at"
+                                "created_at",
+                                "updated_at"
                             ],
                             "example": "created_at"
                         }
@@ -74,6 +75,16 @@
                                 "desc"
                             ],
                             "example": "desc"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "İsim alanında arama yapmak için kullanılır (case-insensitive)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "mehmet"
                         }
                     }
                 ],
@@ -609,7 +620,7 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "ofis@example.com"
+                                        "example": "fatosakbulak@gmail.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -642,11 +653,11 @@
                                                         },
                                                         "name": {
                                                             "type": "string",
-                                                            "example": "Ofis Kullanıcısı"
+                                                            "example": "Fatma Akbulak"
                                                         },
                                                         "email": {
                                                             "type": "string",
-                                                            "example": "ofis@example.com"
+                                                            "example": "fatosakbulak@gmail.com"
                                                         }
                                                     },
                                                     "type": "object"
@@ -778,11 +789,11 @@
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "example": "Ofis Kullanıcısı"
+                                                    "example": "Fatma Akbulak"
                                                 },
                                                 "email": {
                                                     "type": "string",
-                                                    "example": "ofis@example.com"
+                                                    "example": "fatosakbulak@gmail.com"
                                                 }
                                             },
                                             "type": "object"
@@ -811,7 +822,7 @@
                     "Print Requests"
                 ],
                 "summary": "Tüm fotokopi isteklerini listeleme",
-                "description": "Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir. Pagination destekler.",
+                "description": "Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir. Pagination ve filtreleme destekler.",
                 "operationId": "9924477ab0eb432188083718243eb910",
                 "parameters": [
                     {
@@ -872,6 +883,92 @@
                             ],
                             "example": "desc"
                         }
+                    },
+                    {
+                        "name": "requester_names",
+                        "in": "query",
+                        "description": "Talep eden isimleri (virgülle ayrılmış, örnek: 'Ahmet Yılmaz,Mehmet Demir')",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Ahmet Yılmaz,Mehmet Demir"
+                        }
+                    },
+                    {
+                        "name": "approver_names",
+                        "in": "query",
+                        "description": "Onaylayan isimleri (virgülle ayrılmış, örnek: 'Ali Veli,Ayşe Fatma')",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Ali Veli,Ayşe Fatma"
+                        }
+                    },
+                    {
+                        "name": "color_copies_min",
+                        "in": "query",
+                        "description": "Minimum renkli kopya sayısı",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "color_copies_max",
+                        "in": "query",
+                        "description": "Maksimum renkli kopya sayısı",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 100
+                        }
+                    },
+                    {
+                        "name": "bw_copies_min",
+                        "in": "query",
+                        "description": "Minimum siyah-beyaz kopya sayısı",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "bw_copies_max",
+                        "in": "query",
+                        "description": "Maksimum siyah-beyaz kopya sayısı",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "example": 100
+                        }
+                    },
+                    {
+                        "name": "requested_at_from",
+                        "in": "query",
+                        "description": "Talep tarihi başlangıç (Y-m-d H:i:s formatında)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2025-08-01 00:00:00"
+                        }
+                    },
+                    {
+                        "name": "requested_at_to",
+                        "in": "query",
+                        "description": "Talep tarihi bitiş (Y-m-d H:i:s formatında)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2025-08-31 23:59:59"
+                        }
                     }
                 ],
                 "responses": {
@@ -918,6 +1015,10 @@
                                                     "example": true
                                                 }
                                             },
+                                            "type": "object"
+                                        },
+                                        "filters_applied": {
+                                            "description": "Uygulanan filtreler",
                                             "type": "object"
                                         }
                                     },
@@ -988,6 +1089,11 @@
                                         "description": "Siyah-beyaz kopya sayısı",
                                         "type": "integer",
                                         "example": 10
+                                    },
+                                    "description": {
+                                        "description": "İstek açıklama metni",
+                                        "type": "string",
+                                        "example": "Matematik dersi için fotokopi isteği"
                                     },
                                     "requested_at": {
                                         "description": "İstek tarihi",
@@ -1175,6 +1281,11 @@
                                         "type": "integer",
                                         "example": 10
                                     },
+                                    "description": {
+                                        "description": "İstek açıklama metni",
+                                        "type": "string",
+                                        "example": "Matematik dersi için fotokopi isteği"
+                                    },
                                     "requested_at": {
                                         "description": "İstek tarihi",
                                         "type": "string",
@@ -1327,7 +1438,7 @@
                     "Requesters"
                 ],
                 "summary": "Tüm talep edenleri listeleme",
-                "description": "Sistemdeki tüm talep edenleri getirir. Pagination destekler.",
+                "description": "Sistemdeki tüm talep edenleri getirir. Pagination ve arama destekler.",
                 "operationId": "e56907a671ee74565780425153e6aa80",
                 "parameters": [
                     {
@@ -1381,6 +1492,16 @@
                                 "desc"
                             ],
                             "example": "desc"
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "İsim alanında arama yapmak için kullanılır (case-insensitive)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "ahmet"
                         }
                     }
                 ],
@@ -1844,6 +1965,11 @@
                         "type": "integer",
                         "example": 10
                     },
+                    "description": {
+                        "description": "İstek açıklama metni",
+                        "type": "string",
+                        "example": "Matematik dersi için fotokopi isteği"
+                    },
                     "requested_at": {
                         "description": "İstek tarihi",
                         "type": "string",
@@ -1918,12 +2044,12 @@
                     },
                     "name": {
                         "type": "string",
-                        "example": "Ofis Kullanıcısı"
+                        "example": "Fatma Akbulak"
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "example": "ofis@example.com"
+                        "example": "fatosakbulak@gmail.com"
                     },
                     "created_at": {
                         "type": "string",

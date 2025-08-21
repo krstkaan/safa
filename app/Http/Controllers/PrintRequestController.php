@@ -14,7 +14,7 @@ class PrintRequestController extends Controller
      * @OA\Get(
      *     path="/print-requests",
      *     summary="Tüm fotokopi isteklerini listeleme",
-     *     description="Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir. Pagination destekler.",
+     *     description="Sistemdeki tüm fotokopi isteklerini talep eden ve onaylayan bilgileriyle birlikte getirir. Pagination ve filtreleme destekler.",
      *     tags={"Print Requests"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -45,6 +45,62 @@ class PrintRequestController extends Controller
      *         description="Sıralama yönü (varsayılan: desc)",
      *         @OA\Schema(type="string", enum={"asc", "desc"}, example="desc")
      *     ),
+     *     @OA\Parameter(
+     *         name="requester_names",
+     *         in="query",
+     *         required=false,
+     *         description="Talep eden isimleri (virgülle ayrılmış, örnek: 'Ahmet Yılmaz,Mehmet Demir')",
+     *         @OA\Schema(type="string", example="Ahmet Yılmaz,Mehmet Demir")
+     *     ),
+     *     @OA\Parameter(
+     *         name="approver_names",
+     *         in="query",
+     *         required=false,
+     *         description="Onaylayan isimleri (virgülle ayrılmış, örnek: 'Ali Veli,Ayşe Fatma')",
+     *         @OA\Schema(type="string", example="Ali Veli,Ayşe Fatma")
+     *     ),
+     *     @OA\Parameter(
+     *         name="color_copies_min",
+     *         in="query",
+     *         required=false,
+     *         description="Minimum renkli kopya sayısı",
+     *         @OA\Schema(type="integer", example=1, minimum=0)
+     *     ),
+     *     @OA\Parameter(
+     *         name="color_copies_max",
+     *         in="query",
+     *         required=false,
+     *         description="Maksimum renkli kopya sayısı",
+     *         @OA\Schema(type="integer", example=100, minimum=0)
+     *     ),
+     *     @OA\Parameter(
+     *         name="bw_copies_min",
+     *         in="query",
+     *         required=false,
+     *         description="Minimum siyah-beyaz kopya sayısı",
+     *         @OA\Schema(type="integer", example=1, minimum=0)
+     *     ),
+     *     @OA\Parameter(
+     *         name="bw_copies_max",
+     *         in="query",
+     *         required=false,
+     *         description="Maksimum siyah-beyaz kopya sayısı",
+     *         @OA\Schema(type="integer", example=100, minimum=0)
+     *     ),
+     *     @OA\Parameter(
+     *         name="requested_at_from",
+     *         in="query",
+     *         required=false,
+     *         description="Talep tarihi başlangıç (Y-m-d H:i:s formatında)",
+     *         @OA\Schema(type="string", format="date-time", example="2025-08-01 00:00:00")
+     *     ),
+     *     @OA\Parameter(
+     *         name="requested_at_to",
+     *         in="query",
+     *         required=false,
+     *         description="Talep tarihi bitiş (Y-m-d H:i:s formatında)",
+     *         @OA\Schema(type="string", format="date-time", example="2025-08-31 23:59:59")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Başarılı",
@@ -58,7 +114,8 @@ class PrintRequestController extends Controller
      *                 @OA\Property(property="total", type="integer", example=50),
      *                 @OA\Property(property="total_pages", type="integer", example=5),
      *                 @OA\Property(property="has_next_page", type="boolean", example=true)
-     *             )
+     *             ),
+     *             @OA\Property(property="filters_applied", type="object", description="Uygulanan filtreler")
      *         )
      *     ),
      *     @OA\Response(
@@ -94,8 +151,14 @@ class PrintRequestController extends Controller
             $sortDirection = 'desc';
         }
         
-        // Toplam kayıt sayısını al
-        $total = PrintRequest::count();
+        // Query builder'ı başlat
+        $query = PrintRequest::with(['requester', 'approver']);
+        
+        // Filtreleri uygula
+        $appliedFilters = $this->applyFilters($query, $request);
+        
+        // Toplam kayıt sayısını al (filtreler uygulandıktan sonra)
+        $total = $query->count();
         
         // Toplam sayfa sayısını hesapla
         $totalPages = ceil($total / $limit);
@@ -104,7 +167,7 @@ class PrintRequestController extends Controller
         $offset = ($page - 1) * $limit;
         
         // Fotokopi isteklerini getir
-        $printRequests = PrintRequest::with(['requester', 'approver'])
+        $printRequests = $query
             ->orderBy($sortBy, $sortDirection)
             ->offset($offset)
             ->limit($limit)
@@ -123,8 +186,94 @@ class PrintRequestController extends Controller
                 'total' => $total,
                 'total_pages' => $totalPages,
                 'has_next_page' => $hasNextPage
-            ]
+            ],
+            'filters_applied' => $appliedFilters
         ]);
+    }
+
+    /**
+     * Filtreleri query'ye uygula
+     */
+    private function applyFilters($query, Request $request): array
+    {
+        $appliedFilters = [];
+
+        // Talep eden isim filtresi (VEYA mantığı ile çalışır)
+        if ($request->has('requester_names') && !empty($request->get('requester_names'))) {
+            $requesterNames = array_filter(array_map('trim', explode(',', $request->get('requester_names'))));
+            if (!empty($requesterNames)) {
+                $query->whereHas('requester', function ($q) use ($requesterNames) {
+                    $q->whereIn('name', $requesterNames);
+                });
+                $appliedFilters['requester_names'] = $requesterNames;
+            }
+        }
+
+        // Onaylayan isim filtresi (VEYA mantığı ile çalışır)
+        if ($request->has('approver_names') && !empty($request->get('approver_names'))) {
+            $approverNames = array_filter(array_map('trim', explode(',', $request->get('approver_names'))));
+            if (!empty($approverNames)) {
+                $query->whereHas('approver', function ($q) use ($approverNames) {
+                    $q->whereIn('name', $approverNames);
+                });
+                $appliedFilters['approver_names'] = $approverNames;
+            }
+        }
+
+        // Renkli kopya sayısı filtresi (aralık)
+        $colorCopiesMin = $request->get('color_copies_min');
+        $colorCopiesMax = $request->get('color_copies_max');
+        
+        if ($colorCopiesMin !== null && is_numeric($colorCopiesMin)) {
+            $colorCopiesMin = max(0, (int) $colorCopiesMin);
+            $query->where('color_copies', '>=', $colorCopiesMin);
+            $appliedFilters['color_copies_min'] = $colorCopiesMin;
+        }
+        
+        if ($colorCopiesMax !== null && is_numeric($colorCopiesMax)) {
+            $colorCopiesMax = max(0, (int) $colorCopiesMax);
+            $query->where('color_copies', '<=', $colorCopiesMax);
+            $appliedFilters['color_copies_max'] = $colorCopiesMax;
+        }
+
+        // Siyah-beyaz kopya sayısı filtresi (aralık)
+        $bwCopiesMin = $request->get('bw_copies_min');
+        $bwCopiesMax = $request->get('bw_copies_max');
+        
+        if ($bwCopiesMin !== null && is_numeric($bwCopiesMin)) {
+            $bwCopiesMin = max(0, (int) $bwCopiesMin);
+            $query->where('bw_copies', '>=', $bwCopiesMin);
+            $appliedFilters['bw_copies_min'] = $bwCopiesMin;
+        }
+        
+        if ($bwCopiesMax !== null && is_numeric($bwCopiesMax)) {
+            $bwCopiesMax = max(0, (int) $bwCopiesMax);
+            $query->where('bw_copies', '<=', $bwCopiesMax);
+            $appliedFilters['bw_copies_max'] = $bwCopiesMax;
+        }
+
+        // Talep tarihi filtresi (aralık)
+        if ($request->has('requested_at_from') && !empty($request->get('requested_at_from'))) {
+            try {
+                $fromDate = \Carbon\Carbon::parse($request->get('requested_at_from'));
+                $query->where('requested_at', '>=', $fromDate);
+                $appliedFilters['requested_at_from'] = $fromDate->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // Geçersiz tarih formatı, filtreyi yok say
+            }
+        }
+
+        if ($request->has('requested_at_to') && !empty($request->get('requested_at_to'))) {
+            try {
+                $toDate = \Carbon\Carbon::parse($request->get('requested_at_to'));
+                $query->where('requested_at', '<=', $toDate);
+                $appliedFilters['requested_at_to'] = $toDate->format('Y-m-d H:i:s');
+            } catch (\Exception $e) {
+                // Geçersiz tarih formatı, filtreyi yok say
+            }
+        }
+
+        return $appliedFilters;
     }
 
     /**

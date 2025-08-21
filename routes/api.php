@@ -19,7 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Resource routes
     Route::apiResource('requesters', RequesterController::class);
+    // Route::get('/requesters/search', [RequesterController::class, 'search']);
     Route::apiResource('approvers', ApproverController::class);
+    // Route::get('/approvers/search', [ApproverController::class, 'search']);
     Route::apiResource('print-requests', PrintRequestController::class);
 });
 

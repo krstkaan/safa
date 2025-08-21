@@ -15,8 +15,8 @@ use Laravel\Sanctum\HasApiTokens;
  *     title="User",
  *     description="Kullanıcı modeli",
  *     @OA\Property(property="id", type="integer", example=1),
- *     @OA\Property(property="name", type="string", example="Ofis Kullanıcısı"),
- *     @OA\Property(property="email", type="string", format="email", example="ofis@example.com"),
+ *     @OA\Property(property="name", type="string", example="Fatma Akbulak"),
+ *     @OA\Property(property="email", type="string", format="email", example="fatosakbulak@gmail.com"),
  *     @OA\Property(property="created_at", type="string", format="date-time"),
  *     @OA\Property(property="updated_at", type="string", format="date-time")
  * )

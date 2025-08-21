@@ -12,7 +12,7 @@ class RequesterController extends Controller
      * @OA\Get(
      *     path="/requesters",
      *     summary="Tüm talep edenleri listeleme",
-     *     description="Sistemdeki tüm talep edenleri getirir. Pagination destekler.",
+     *     description="Sistemdeki tüm talep edenleri getirir. Pagination ve arama destekler.",
      *     tags={"Requesters"},
      *     security={{"sanctum":{}}},
      *     @OA\Parameter(
@@ -42,6 +42,13 @@ class RequesterController extends Controller
      *         required=false,
      *         description="Sıralama yönü (varsayılan: desc)",
      *         @OA\Schema(type="string", enum={"asc", "desc"}, example="desc")
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         required=false,
+     *         description="İsim alanında arama yapmak için kullanılır (case-insensitive)",
+     *         @OA\Schema(type="string", example="ahmet")
      *     ),
      *     @OA\Response(
      *         response=200,
@@ -80,6 +87,9 @@ class RequesterController extends Controller
         $sortBy = $request->get('sort_by', 'created_at');
         $sortDirection = $request->get('sort_direction', 'desc');
         
+        // Arama parametresini al
+        $search = $request->get('search');
+        
         // Geçerli sıralama alanlarını kontrol et
         $allowedSortFields = ['id', 'name', 'created_at', 'updated_at'];
         if (!in_array($sortBy, $allowedSortFields)) {
@@ -92,8 +102,16 @@ class RequesterController extends Controller
             $sortDirection = 'desc';
         }
         
-        // Toplam kayıt sayısını al
-        $total = Requester::count();
+        // Query builder'ı oluştur
+        $query = Requester::query();
+        
+        // Arama varsa filtrele
+        if (!empty($search)) {
+            $query->where('name', 'ILIKE', '%' . $search . '%');
+        }
+        
+        // Toplam kayıt sayısını al (filtreleme sonrası)
+        $total = $query->count();
         
         // Toplam sayfa sayısını hesapla
         $totalPages = ceil($total / $limit);
@@ -102,7 +120,7 @@ class RequesterController extends Controller
         $offset = ($page - 1) * $limit;
         
         // Talep edenleri getir
-        $requesters = Requester::orderBy($sortBy, $sortDirection)
+        $requesters = $query->orderBy($sortBy, $sortDirection)
             ->offset($offset)
             ->limit($limit)
             ->get();
@@ -110,10 +128,15 @@ class RequesterController extends Controller
         // Sonraki sayfa var mı kontrolü
         $hasNextPage = $page < $totalPages;
         
+        $message = !empty($search) 
+            ? "Talep edenler arama sonuçları başarıyla listelendi." 
+            : "Talep edenler başarıyla listelendi.";
+        
         return response()->json([
             'status' => 'success',
             'data' => $requesters,
-            'message' => 'Talep edenler başarıyla listelendi.',
+            'message' => $message,
+            'search_term' => $search,
             'pagination' => [
                 'current_page' => $page,
                 'per_page' => $limit,
@@ -123,7 +146,7 @@ class RequesterController extends Controller
             ]
         ]);
     }
-
+    
     /**
      * @OA\Get(
      *     path="/requesters/{id}",

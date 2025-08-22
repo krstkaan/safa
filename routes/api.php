@@ -23,12 +23,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('approvers', ApproverController::class);
     // Route::get('/approvers/search', [ApproverController::class, 'search']);
     Route::apiResource('print-requests', PrintRequestController::class);
-
-
-});
     Route::get('/print-requests/export/by-requester', [PrintRequestController::class, 'exportByRequester']);
 
     Route::get('/print-requests/export/comparison', [PrintRequestController::class, 'exportComparison']);
+
+});
+
 
 // Test endpoint (development için)
 Route::get('/test', function () {

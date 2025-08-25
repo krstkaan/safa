@@ -260,7 +260,7 @@ class PrintRequestController extends Controller
         // Talep tarihi filtresi (aralık)
         if ($request->has('requested_at_from') && !empty($request->get('requested_at_from'))) {
             try {
-                $fromDate = \Carbon\Carbon::parse($request->get('requested_at_from'));
+                $fromDate = Carbon::parse($request->get('requested_at_from'));
                 $query->where('requested_at', '>=', $fromDate);
                 $appliedFilters['requested_at_from'] = $fromDate->format('Y-m-d H:i:s');
             } catch (\Exception $e) {
@@ -270,7 +270,7 @@ class PrintRequestController extends Controller
 
         if ($request->has('requested_at_to') && !empty($request->get('requested_at_to'))) {
             try {
-                $toDate = \Carbon\Carbon::parse($request->get('requested_at_to'));
+                $toDate = Carbon::parse($request->get('requested_at_to'));
                 $query->where('requested_at', '<=', $toDate);
                 $appliedFilters['requested_at_to'] = $toDate->format('Y-m-d H:i:s');
             } catch (\Exception $e) {
@@ -569,10 +569,9 @@ class PrintRequestController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Excel dosyası başarıyla indirildi.",
-     *         @OA\Content(
-     *             @OA\MediaType(
-     *                 mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-     *             )
+     *         @OA\MediaType(
+     *             mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     *             @OA\Schema(type="string", format="binary")
      *         )
      *     ),
      *     @OA\Response(
@@ -649,10 +648,9 @@ class PrintRequestController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Excel dosyası başarıyla indirildi.",
-     *         @OA\Content(
-     *             @OA\MediaType(
-     *                 mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-     *             )
+     *         @OA\MediaType(
+     *             mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     *             @OA\Schema(type="string", format="binary")
      *         )
      *     ),
      *     @OA\Response(

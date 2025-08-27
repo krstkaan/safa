@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\PublisherController;
 use Illuminate\Support\Facades\Route;
@@ -39,4 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('publishers', PublisherController::class);
 
     Route::apiResource('grades', GradeController::class);
+
+    Route::apiResource('books', BookController::class);
+
+    Route::apiResource('authors', AuthorController::class);
+
 });

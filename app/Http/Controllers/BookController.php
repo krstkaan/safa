@@ -44,7 +44,7 @@ class BookController extends Controller
      *         @OA\Schema(type="string", enum={"asc", "desc"}, example="desc")
      *     ),
      *     @OA\Parameter(
-     *         name="search",
+     *         name="name",
      *         in="query",
      *         required=false,
      *         description="Kitap adında arama yapmak için kullanılır (case-insensitive)",
@@ -123,7 +123,7 @@ class BookController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
         
         // Arama ve filtreleme parametrelerini al
-        $search = $request->get('search');
+        $name = $request->get('name');
         $authorId = $request->get('author_id');
         $publisherId = $request->get('publisher_id');
         $gradeId = $request->get('grade_id');
@@ -151,8 +151,8 @@ class BookController extends Controller
         }
         
         // Arama varsa filtrele
-        if (!empty($search)) {
-            $query->where('name', 'ILIKE', '%' . $search . '%');
+        if (!empty($name)) {
+            $query->where('name', 'ILIKE', '%' . $name . '%');
         }
         
         // Yazar filtrelemesi
@@ -195,7 +195,7 @@ class BookController extends Controller
         // Sonraki sayfa var mı kontrolü
         $hasNextPage = $page < $totalPages;
         
-        $message = !empty($search) 
+        $message = !empty($name) 
             ? "Kitaplar arama sonuçları başarıyla listelendi." 
             : "Kitaplar başarıyla listelendi.";
         
@@ -203,7 +203,7 @@ class BookController extends Controller
             'status' => 'success',
             'data' => $books,
             'message' => $message,
-            'search_term' => $search,
+            'name_term' => $name,
             'filters' => [
                 'author_id' => $authorId,
                 'publisher_id' => $publisherId,
@@ -328,7 +328,6 @@ class BookController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'type' => 'nullable|string|max:255',
                 'language' => 'nullable|string|max:255',
                 'page_count' => 'nullable|integer|min:1',
                 'is_donation' => 'boolean',
@@ -435,7 +434,6 @@ class BookController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'type' => 'nullable|string|max:255',
                 'language' => 'nullable|string|max:255',
                 'page_count' => 'nullable|integer|min:1',
                 'is_donation' => 'boolean',

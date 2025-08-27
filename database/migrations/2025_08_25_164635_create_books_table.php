@@ -11,7 +11,6 @@ class CreateBooksTable extends Migration
         Schema::create('books', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('type')->nullable();
             $table->string('language')->nullable();
             $table->unsignedInteger('page_count')->nullable();
             $table->boolean('is_donation')->default(false);

@@ -19,6 +19,10 @@ class DatabaseSeeder extends Seeder
             RequesterSeeder::class,
             ApproverSeeder::class,
             PrintRequestSeeder::class,
+            AuthorSeeder::class,
+            PublisherSeeder::class,
+            GradeSeeder::class,
+            BookSeeder::class,
         ]);
     }
 }

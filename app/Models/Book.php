@@ -46,15 +46,14 @@ class Book extends Model
     protected $fillable = [
         'name',
         // 'grade', // Bu satır kaldırıldı çünkü ilişki artık pivot tablo üzerinden yönetiliyor.
-        'type',
+        'barcode',
+        'author_id', // Yazar ilişkisi Bire-Çok olarak kalıyor.
+        'publisher_id',
         'language',
         'page_count',
         'is_donation',
-        'barcode',
         'shelf_code',
         'fixture_no',
-        'author_id', // Yazar ilişkisi Bire-Çok olarak kalıyor.
-        'publisher_id',
     ];
 
     /**

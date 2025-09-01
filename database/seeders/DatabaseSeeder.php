@@ -21,7 +21,6 @@ class DatabaseSeeder extends Seeder
             PrintRequestSeeder::class,
             AuthorSeeder::class,
             PublisherSeeder::class,
-            GradeSeeder::class,
             BookSeeder::class,
         ]);
     }

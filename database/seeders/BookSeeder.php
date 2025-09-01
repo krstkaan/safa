@@ -12,8 +12,8 @@ class BookSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Kitap
-        $book1 = Book::create([
+        // 1. Kitap - İlkokul seviyesi
+        Book::create([
             'name' => 'Küçük Prens',
             'language' => 'Türkçe',
             'page_count' => 96,
@@ -21,13 +21,13 @@ class BookSeeder extends Seeder
             'barcode' => '9786051111234',
             'shelf_code' => '3',
             'fixture_no' => 'F001',
+            'level' => 'ilkokul',
             'author_id' => 1, // Antoine de Saint-Exupéry
             'publisher_id' => 1, // Can Yayınları
         ]);
-        $book1->grades()->attach([1, 2, 3, 4]); // örnek: 1. ve 2. sınıflara uygun
 
-        // 2. Kitap
-        $book2 = Book::create([
+        // 2. Kitap - Ortaokul seviyesi
+        Book::create([
             'name' => 'Sineklerin Tanrısı',
             'language' => 'Türkçe',
             'page_count' => 224,
@@ -35,13 +35,13 @@ class BookSeeder extends Seeder
             'barcode' => '9786051111235',
             'shelf_code' => '4',
             'fixture_no' => 'F002',
+            'level' => 'ortaokul',
             'author_id' => 2, // William Golding
             'publisher_id' => 1, // Can Yayınları
         ]);
-        $book2->grades()->attach([5, 6, 7, 8]); // örnek: 5. sınıfa uygun
 
-        // 3. Kitap
-        $book3 = Book::create([
+        // 3. Kitap - Ortaokul seviyesi
+        Book::create([
             'name' => '1984',
             'language' => 'Türkçe',
             'page_count' => 328,
@@ -49,9 +49,37 @@ class BookSeeder extends Seeder
             'barcode' => '9786051111236',
             'shelf_code' => '5',
             'fixture_no' => 'F003',
+            'level' => 'ortaokul',
             'author_id' => 3, // George Orwell
             'publisher_id' => 2, // Penguin Random House
         ]);
-        $book3->grades()->attach([5, 6, 7, 8]); // örnek: 5. sınıfa uygun
+
+        // 4. Kitap - Ortak (tüm seviyeler için uygun)
+        Book::create([
+            'name' => 'Türk Masalları',
+            'language' => 'Türkçe',
+            'page_count' => 156,
+            'is_donation' => true,
+            'barcode' => '9786051111237',
+            'shelf_code' => '1',
+            'fixture_no' => 'F004',
+            'level' => 'ortak',
+            'author_id' => 1, // Antoine de Saint-Exupéry
+            'publisher_id' => 1, // Can Yayınları
+        ]);
+
+        // 5. Kitap - İlkokul seviyesi
+        Book::create([
+            'name' => 'Kedi ile Köpek',
+            'language' => 'Türkçe',
+            'page_count' => 48,
+            'is_donation' => false,
+            'barcode' => '9786051111238',
+            'shelf_code' => '2',
+            'fixture_no' => 'F005',
+            'level' => 'ilkokul',
+            'author_id' => 2, // William Golding
+            'publisher_id' => 2, // Penguin Random House
+        ]);
     }
 }

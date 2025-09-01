@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Book;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
 
 class BookController extends Controller
 {
@@ -65,11 +66,11 @@ class BookController extends Controller
      *         @OA\Schema(type="integer", example=1)
      *     ),
      *     @OA\Parameter(
-     *         name="grade_id",
+     *         name="level",
      *         in="query",
      *         required=false,
-     *         description="Sınıfa göre filtreleme",
-     *         @OA\Schema(type="integer", example=5)
+     *         description="Seviyeye göre filtreleme",
+     *         @OA\Schema(type="string", enum={"ilkokul", "ortaokul", "ortak"}, example="ilkokul")
      *     ),
      *     @OA\Parameter(
      *         name="is_donation",
@@ -82,7 +83,7 @@ class BookController extends Controller
      *         name="with_relations",
      *         in="query",
      *         required=false,
-     *         description="İlişkili verileri dahil et (author,publisher,grades)",
+     *         description="İlişkili verileri dahil et (author,publisher)",
      *         @OA\Schema(type="boolean", example=true)
      *     ),
      *     @OA\Response(
@@ -126,7 +127,7 @@ class BookController extends Controller
         $name = $request->get('name');
         $authorId = $request->get('author_id');
         $publisherId = $request->get('publisher_id');
-        $gradeId = $request->get('grade_id');
+        $level = $request->get('level');
         $isDonation = $request->get('is_donation');
         $withRelations = $request->boolean('with_relations', false);
         
@@ -147,7 +148,7 @@ class BookController extends Controller
         
         // İlişkili verileri dahil et
         if ($withRelations) {
-            $query->with(['author', 'publisher', 'grades']);
+            $query->with(['author', 'publisher']);
         }
         
         // Arama varsa filtrele
@@ -165,11 +166,12 @@ class BookController extends Controller
             $query->where('publisher_id', $publisherId);
         }
         
-        // Sınıf filtrelemesi (many-to-many ilişki)
-        if (!empty($gradeId)) {
-            $query->whereHas('grades', function($q) use ($gradeId) {
-                $q->where('grade_id', $gradeId);
-            });
+        // Seviye filtrelemesi
+        if (!empty($level)) {
+            $allowedLevels = ['ilkokul', 'ortaokul', 'ortak'];
+            if (in_array($level, $allowedLevels)) {
+                $query->where('level', $level);
+            }
         }
         
         // Bağış durumu filtrelemesi
@@ -207,7 +209,7 @@ class BookController extends Controller
             'filters' => [
                 'author_id' => $authorId,
                 'publisher_id' => $publisherId,
-                'grade_id' => $gradeId,
+                'level' => $level,
                 'is_donation' => $isDonation,
                 'with_relations' => $withRelations
             ],
@@ -239,7 +241,7 @@ class BookController extends Controller
      *         name="with_relations",
      *         in="query",
      *         required=false,
-     *         description="İlişkili verileri dahil et (author,publisher,grades)",
+     *         description="İlişkili verileri dahil et (author,publisher)",
      *         @OA\Schema(type="boolean", example=true)
      *     ),
      *     @OA\Response(
@@ -267,7 +269,7 @@ class BookController extends Controller
         $withRelations = $request->boolean('with_relations', false);
         
         if ($withRelations) {
-            $book->load(['author', 'publisher', 'grades']);
+            $book->load(['author', 'publisher']);
         }
         
         return response()->json([
@@ -293,12 +295,12 @@ class BookController extends Controller
      *             @OA\Property(property="language", type="string", example="Türkçe"),
      *             @OA\Property(property="page_count", type="integer", example=320),
      *             @OA\Property(property="is_donation", type="boolean", example=false),
-     *             @OA\Property(property="barcode", type="string", example="9781234567890"),
+     *             @OA\Property(property="barcode", type="string", example="9781234567890", description="Kitap barkodu (aynı kitaptan birden fazla kopya olabilir)"),
      *             @OA\Property(property="shelf_code", type="string", example="A1-B2"),
-     *             @OA\Property(property="fixture_no", type="string", example="FIX001"),
+     *             @OA\Property(property="fixture_no", type="string", example="FIX001", description="Benzersiz demirbaş numarası"),
      *             @OA\Property(property="author_id", type="integer", example=1),
      *             @OA\Property(property="publisher_id", type="integer", example=1),
-     *             @OA\Property(property="grade_ids", type="array", @OA\Items(type="integer"), example={5, 6, 7})
+     *             @OA\Property(property="level", type="string", enum={"ilkokul", "ortaokul", "ortak"}, example="ilkokul")
      *         )
      *     ),
      *     @OA\Response(
@@ -331,28 +333,23 @@ class BookController extends Controller
                 'language' => 'nullable|string|max:255',
                 'page_count' => 'nullable|integer|min:1',
                 'is_donation' => 'boolean',
-                'barcode' => 'nullable|string|max:255|unique:books,barcode',
+                'barcode' => 'nullable|string|max:255',
                 'shelf_code' => 'nullable|string|max:255',
-                'fixture_no' => 'nullable|string|max:255',
+                'fixture_no' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('books', 'fixture_no')->whereNull('deleted_at')
+                ],
                 'author_id' => 'required|exists:authors,id',
                 'publisher_id' => 'required|exists:publishers,id',
-                'grade_ids' => 'nullable|array',
-                'grade_ids.*' => 'exists:grades,id'
+                'level' => 'required|in:ilkokul,ortaokul,ortak'
             ]);
-
-            // Grade IDs'i ayrı tut
-            $gradeIds = $validated['grade_ids'] ?? [];
-            unset($validated['grade_ids']);
 
             $book = Book::create($validated);
 
-            // Sınıf ilişkilerini ekle
-            if (!empty($gradeIds)) {
-                $book->grades()->attach($gradeIds);
-            }
-
             // İlişkili verileri yükle
-            $book->load(['author', 'publisher', 'grades']);
+            $book->load(['author', 'publisher']);
 
             return response()->json([
                 'status' => 'success',
@@ -392,12 +389,12 @@ class BookController extends Controller
      *             @OA\Property(property="language", type="string", example="Türkçe"),
      *             @OA\Property(property="page_count", type="integer", example=350),
      *             @OA\Property(property="is_donation", type="boolean", example=true),
-     *             @OA\Property(property="barcode", type="string", example="9781234567891"),
+     *             @OA\Property(property="barcode", type="string", example="9781234567891", description="Kitap barkodu (aynı kitaptan birden fazla kopya olabilir)"),
      *             @OA\Property(property="shelf_code", type="string", example="A1-B3"),
-     *             @OA\Property(property="fixture_no", type="string", example="FIX002"),
+     *             @OA\Property(property="fixture_no", type="string", example="FIX002", description="Benzersiz demirbaş numarası"),
      *             @OA\Property(property="author_id", type="integer", example=1),
      *             @OA\Property(property="publisher_id", type="integer", example=1),
-     *             @OA\Property(property="grade_ids", type="array", @OA\Items(type="integer"), example={6, 7, 8})
+     *             @OA\Property(property="level", type="string", enum={"ilkokul", "ortaokul", "ortak"}, example="ortaokul")
      *         )
      *     ),
      *     @OA\Response(
@@ -437,28 +434,23 @@ class BookController extends Controller
                 'language' => 'nullable|string|max:255',
                 'page_count' => 'nullable|integer|min:1',
                 'is_donation' => 'boolean',
-                'barcode' => 'nullable|string|max:255|unique:books,barcode,' . $book->id,
+                'barcode' => 'nullable|string|max:255',
                 'shelf_code' => 'nullable|string|max:255',
-                'fixture_no' => 'nullable|string|max:255',
+                'fixture_no' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('books', 'fixture_no')->whereNull('deleted_at')->ignore($book->id)
+                ],
                 'author_id' => 'required|exists:authors,id',
                 'publisher_id' => 'required|exists:publishers,id',
-                'grade_ids' => 'nullable|array',
-                'grade_ids.*' => 'exists:grades,id'
+                'level' => 'required|in:ilkokul,ortaokul,ortak'
             ]);
-
-            // Grade IDs'i ayrı tut
-            $gradeIds = $validated['grade_ids'] ?? [];
-            unset($validated['grade_ids']);
 
             $book->update($validated);
 
-            // Sınıf ilişkilerini güncelle
-            if (isset($request->grade_ids)) {
-                $book->grades()->sync($gradeIds);
-            }
-
             // İlişkili verileri yükle
-            $book->load(['author', 'publisher', 'grades']);
+            $book->load(['author', 'publisher']);
 
             return response()->json([
                 'status' => 'success',

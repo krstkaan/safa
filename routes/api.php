@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('publishers', PublisherController::class);
 
-    Route::apiResource('grades', GradeController::class);
+    // Route::apiResource('grades', GradeController::class); // Artık kullanılmıyor - level sistemi kullanılıyor
 
     Route::apiResource('books', BookController::class);
 

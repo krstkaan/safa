@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AllPrintRequestsExport;
 use App\Exports\PrintRequestsComparisonExport;
 use App\Models\Approver;
 use App\Models\PrintRequest;
@@ -691,6 +692,80 @@ class PrintRequestController extends Controller
                     $secondStartDate->toDateTimeString(),
                     $secondEndDate->toDateTimeString()
                 ),
+                $fileName
+            );
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Doğrulama hatası.',
+                'errors' => $e->errors()
+            ], 422);
+        }
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/print-requests/export/all",
+     *     summary="Tüm fotokopi taleplerini Excel formatında export et",
+     *     tags={"Print Requests"},
+     *     security={{"bearerAuth": {}}},
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         description="Başlangıç tarihi (YYYY-MM-DD formatında, isteğe bağlı)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2025-01-01")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         description="Bitiş tarihi (YYYY-MM-DD formatında, isteğe bağlı)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date", example="2025-12-31")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Excel dosyası başarıyla oluşturuldu",
+     *         @OA\MediaType(
+     *             mediaType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     *             @OA\Schema(type="string", format="binary")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Doğrulama hatası",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="string", example="error"),
+     *             @OA\Property(property="message", type="string", example="Doğrulama hatası."),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function exportAll(Request $request): BinaryFileResponse|JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'start_date' => 'nullable|date|date_format:Y-m-d',
+                'end_date' => 'nullable|date|date_format:Y-m-d|after_or_equal:start_date',
+            ]);
+
+            $startDate = null;
+            $endDate = null;
+            $fileName = 'tum_fotokopi_talepleri';
+
+            // Eğer tarih aralığı belirtilmişse kullan
+            if (isset($validated['start_date']) && isset($validated['end_date'])) {
+                $startDate = Carbon::parse($validated['start_date'])->startOfDay()->toDateTimeString();
+                $endDate = Carbon::parse($validated['end_date'])->endOfDay()->toDateTimeString();
+                $fileName .= '_' . $validated['start_date'] . '_' . $validated['end_date'];
+            }
+
+            $fileName .= '.xlsx';
+
+            return Excel::download(
+                new AllPrintRequestsExport($startDate, $endDate),
                 $fileName
             );
 

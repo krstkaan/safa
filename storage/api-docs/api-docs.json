@@ -1349,7 +1349,7 @@
                         }
                     },
                     {
-                        "name": "search",
+                        "name": "name",
                         "in": "query",
                         "description": "Kitap adında arama yapmak için kullanılır (case-insensitive)",
                         "required": false,
@@ -1379,13 +1379,18 @@
                         }
                     },
                     {
-                        "name": "grade_id",
+                        "name": "level",
                         "in": "query",
-                        "description": "Sınıfa göre filtreleme",
+                        "description": "Seviyeye göre filtreleme",
                         "required": false,
                         "schema": {
-                            "type": "integer",
-                            "example": 5
+                            "type": "string",
+                            "enum": [
+                                "ilkokul",
+                                "ortaokul",
+                                "ortak"
+                            ],
+                            "example": "ilkokul"
                         }
                     },
                     {
@@ -1401,7 +1406,7 @@
                     {
                         "name": "with_relations",
                         "in": "query",
-                        "description": "İlişkili verileri dahil et (author,publisher,grades)",
+                        "description": "İlişkili verileri dahil et (author,publisher)",
                         "required": false,
                         "schema": {
                             "type": "boolean",
@@ -1523,6 +1528,7 @@
                                         "example": false
                                     },
                                     "barcode": {
+                                        "description": "Kitap barkodu (aynı kitaptan birden fazla kopya olabilir)",
                                         "type": "string",
                                         "example": "9781234567890"
                                     },
@@ -1531,6 +1537,7 @@
                                         "example": "A1-B2"
                                     },
                                     "fixture_no": {
+                                        "description": "Benzersiz demirbaş numarası",
                                         "type": "string",
                                         "example": "FIX001"
                                     },
@@ -1542,16 +1549,14 @@
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "grade_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            5,
-                                            6,
-                                            7
-                                        ]
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ilkokul",
+                                            "ortaokul",
+                                            "ortak"
+                                        ],
+                                        "example": "ilkokul"
                                     }
                                 },
                                 "type": "object"
@@ -1636,7 +1641,7 @@
                     {
                         "name": "with_relations",
                         "in": "query",
-                        "description": "İlişkili verileri dahil et (author,publisher,grades)",
+                        "description": "İlişkili verileri dahil et (author,publisher)",
                         "required": false,
                         "schema": {
                             "type": "boolean",
@@ -1742,6 +1747,7 @@
                                         "example": true
                                     },
                                     "barcode": {
+                                        "description": "Kitap barkodu (aynı kitaptan birden fazla kopya olabilir)",
                                         "type": "string",
                                         "example": "9781234567891"
                                     },
@@ -1750,6 +1756,7 @@
                                         "example": "A1-B3"
                                     },
                                     "fixture_no": {
+                                        "description": "Benzersiz demirbaş numarası",
                                         "type": "string",
                                         "example": "FIX002"
                                     },
@@ -1761,16 +1768,14 @@
                                         "type": "integer",
                                         "example": 1
                                     },
-                                    "grade_ids": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
-                                        "example": [
-                                            6,
-                                            7,
-                                            8
-                                        ]
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "ilkokul",
+                                            "ortaokul",
+                                            "ortak"
+                                        ],
+                                        "example": "ortaokul"
                                     }
                                 },
                                 "type": "object"
@@ -1897,478 +1902,6 @@
                                         "message": {
                                             "type": "string",
                                             "example": "No query results for model [App\\\\Models\\\\Book]."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/grades": {
-            "get": {
-                "tags": [
-                    "Grades"
-                ],
-                "summary": "Tüm sınıfları listeleme",
-                "description": "Sistemdeki tüm sınıfları getirir. Pagination ve arama destekler.",
-                "operationId": "1239188cd1f782672fa8cc4a827a8566",
-                "parameters": [
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Sayfa numarası (varsayılan: 1)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "minimum": 1,
-                            "example": 1
-                        }
-                    },
-                    {
-                        "name": "limit",
-                        "in": "query",
-                        "description": "Sayfa başına kayıt sayısı (varsayılan: 10, maksimum: 100)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "maximum": 100,
-                            "minimum": 1,
-                            "example": 10
-                        }
-                    },
-                    {
-                        "name": "sort_by",
-                        "in": "query",
-                        "description": "Sıralama alanı (varsayılan: created_at)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "id",
-                                "name",
-                                "created_at",
-                                "updated_at"
-                            ],
-                            "example": "created_at"
-                        }
-                    },
-                    {
-                        "name": "sort_direction",
-                        "in": "query",
-                        "description": "Sıralama yönü (varsayılan: desc)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "asc",
-                                "desc"
-                            ],
-                            "example": "desc"
-                        }
-                    },
-                    {
-                        "name": "search",
-                        "in": "query",
-                        "description": "İsim alanında arama yapmak için kullanılır",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "example": 5
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Başarılı",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/Grade"
-                                            }
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sınıflar başarıyla listelendi."
-                                        },
-                                        "pagination": {
-                                            "properties": {
-                                                "current_page": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "per_page": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "total": {
-                                                    "type": "integer",
-                                                    "example": 50
-                                                },
-                                                "total_pages": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "has_next_page": {
-                                                    "type": "boolean",
-                                                    "example": true
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Yetkisiz erişim",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "post": {
-                "tags": [
-                    "Grades"
-                ],
-                "summary": "Yeni sınıf oluşturma",
-                "description": "Yeni bir sınıf kaydı oluşturur",
-                "operationId": "e1b7681d72b9d86cd95fa02f6b2f3041",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "integer",
-                                        "maximum": 8,
-                                        "minimum": 1,
-                                        "example": 5
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Başarıyla oluşturuldu",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/Grade"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sınıf başarıyla oluşturuldu."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Doğrulama hatası",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Doğrulama hatası."
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/grades/{id}": {
-            "get": {
-                "tags": [
-                    "Grades"
-                ],
-                "summary": "Tekil sınıf gösterme",
-                "description": "Belirtilen ID'ye sahip sınıfı getirir",
-                "operationId": "8ec0052553a3bacc438b2cae3329d90a",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Sınıf ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Başarılı",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/Grade"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sınıf başarıyla getirildi."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Bulunamadı",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No query results for model [App\\\\Models\\\\Grade]."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "put": {
-                "tags": [
-                    "Grades"
-                ],
-                "summary": "Sınıf güncelleme",
-                "description": "Mevcut sınıfın bilgilerini günceller",
-                "operationId": "e94e05b311e5fc4315bcf07970cc87cd",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Sınıf ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "name"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "integer",
-                                        "maximum": 8,
-                                        "minimum": 1,
-                                        "example": 6
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Başarıyla güncellendi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/Grade"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sınıf başarıyla güncellendi."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Bulunamadı",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No query results for model [App\\\\Models\\\\Grade]."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Doğrulama hatası",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "error"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Doğrulama hatası."
-                                        },
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            },
-            "delete": {
-                "tags": [
-                    "Grades"
-                ],
-                "summary": "Sınıf silme (Soft Delete)",
-                "description": "Belirtilen sınıfı sistemden soft delete yapar. Kayıt fiziksel olarak silinmez, sadece deleted_at alanı güncellenir.",
-                "operationId": "199d4170bcb06b59b8f2c1e2be5df592",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Sınıf ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "example": 1
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Başarıyla silindi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "example": "success"
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Sınıf başarıyla silindi."
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Bulunamadı",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "example": "No query results for model [App\\\\Models\\\\Grade]."
                                         }
                                     },
                                     "type": "object"
@@ -3168,6 +2701,80 @@
                 "security": [
                     {
                         "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/print-requests/export/all": {
+            "get": {
+                "tags": [
+                    "Print Requests"
+                ],
+                "summary": "Tüm fotokopi taleplerini Excel formatında export et",
+                "operationId": "00295cabd30318b4b0b9cd71bd824293",
+                "parameters": [
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "description": "Başlangıç tarihi (YYYY-MM-DD formatında, isteğe bağlı)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "description": "Bitiş tarihi (YYYY-MM-DD formatında, isteğe bağlı)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-31"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Excel dosyası başarıyla oluşturuldu",
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Doğrulama hatası",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "error"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Doğrulama hatası."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -4176,7 +3783,7 @@
             },
             "Book": {
                 "title": "Book",
-                "description": "Kitap kaydı. Bir kitabın birden çok sınıf seviyesi olabilir.",
+                "description": "Kitap kaydı. Kitapların seviyesi (İlkokul, Ortaokul, Ortak) bulunur.",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -4202,7 +3809,7 @@
                         "example": 150
                     },
                     "barcode": {
-                        "description": "Barkod numarası",
+                        "description": "Barkod numarası (aynı kitaptan birden fazla kopya olabilir)",
                         "type": "string",
                         "example": "9786053435345"
                     },
@@ -4211,43 +3818,20 @@
                         "type": "string",
                         "example": "R12-S3"
                     },
-                    "grades": {
-                        "description": "Kitabın uygun olduğu sınıf seviyeleri",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Grade"
-                        }
-                    },
-                    "created_at": {
+                    "fixture_no": {
+                        "description": "Benzersiz demirbaş numarası",
                         "type": "string",
-                        "format": "date-time",
-                        "nullable": true
+                        "example": "FIX001"
                     },
-                    "updated_at": {
+                    "level": {
+                        "description": "Kitabın seviyesi",
                         "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    },
-                    "deleted_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    }
-                },
-                "type": "object"
-            },
-            "Grade": {
-                "title": "Grade",
-                "description": "Sınıf seviyesi kaydı. 1'den 8'e kadar olan seviyeleri tutar.",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "name": {
-                        "description": "Sınıf seviyesi (1-8 arası bir sayı)",
-                        "type": "integer",
-                        "example": 5
+                        "enum": [
+                            "ilkokul",
+                            "ortaokul",
+                            "ortak"
+                        ],
+                        "example": "ilkokul"
                     },
                     "created_at": {
                         "type": "string",
@@ -4447,10 +4031,6 @@
         {
             "name": "Books",
             "description": "Books"
-        },
-        {
-            "name": "Grades",
-            "description": "Grades"
         },
         {
             "name": "Print Requests",

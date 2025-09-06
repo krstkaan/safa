@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('print-requests/export')->group(function () {
         Route::get('/by-requester', [PrintRequestController::class, 'exportByRequester']);
         Route::get('/comparison', [PrintRequestController::class, 'exportComparison']);
+        Route::get('/all', [PrintRequestController::class, 'exportAll']);
     });
 
     Route::apiResource('publishers', PublisherController::class);

@@ -102,8 +102,8 @@ class AuthController extends Controller
      *         required=true,
      *         @OA\JsonContent(
      *             required={"email","password"},
-     *             @OA\Property(property="email", type="string", format="email", example="fatosakbulak@gmail.com"),
-     *             @OA\Property(property="password", type="string", example="349381Ce.")
+     *             @OA\Property(property="email", type="string", format="email", example="user@gmail.com"),
+     *             @OA\Property(property="password", type="string", example="Password1!")
      *         )
      *     ),
      *     @OA\Response(
@@ -115,7 +115,7 @@ class AuthController extends Controller
      *                 @OA\Property(property="user", type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="name", type="string", example="Fatma Akbulak"),
-     *                     @OA\Property(property="email", type="string", example="fatosakbulak@gmail.com")
+     *                     @OA\Property(property="email", type="string", example="user@gmail.com")
      *                 ),
      *                 @OA\Property(property="token", type="string", example="1|abcdef123456...")
      *             ),
@@ -224,7 +224,7 @@ class AuthController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="name", type="string", example="Fatma Akbulak"),
-     *                 @OA\Property(property="email", type="string", example="fatosakbulak@gmail.com")
+     *                 @OA\Property(property="email", type="string", example="user@gmail.com")
      *             ),
      *             @OA\Property(property="message", type="string", example="Kullanıcı bilgileri getirildi.")
      *         )

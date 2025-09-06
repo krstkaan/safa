@@ -620,11 +620,11 @@
                                     "email": {
                                         "type": "string",
                                         "format": "email",
-                                        "example": "fatosakbulak@gmail.com"
+                                        "example": "user@gmail.com"
                                     },
                                     "password": {
                                         "type": "string",
-                                        "example": "349381Ce."
+                                        "example": "Password1!"
                                     }
                                 },
                                 "type": "object"
@@ -657,7 +657,7 @@
                                                         },
                                                         "email": {
                                                             "type": "string",
-                                                            "example": "fatosakbulak@gmail.com"
+                                                            "example": "user@gmail.com"
                                                         }
                                                     },
                                                     "type": "object"
@@ -793,7 +793,7 @@
                                                 },
                                                 "email": {
                                                     "type": "string",
-                                                    "example": "fatosakbulak@gmail.com"
+                                                    "example": "user@gmail.com"
                                                 }
                                             },
                                             "type": "object"
@@ -3993,7 +3993,7 @@
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "example": "fatosakbulak@gmail.com"
+                        "example": "user@gmail.com"
                     },
                     "created_at": {
                         "type": "string",
